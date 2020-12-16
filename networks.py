@@ -31,7 +31,7 @@ def get_dataset(path):
     return mds
 
 
-class VeloEncoderSmall(nn.Module):
+class VeloEncoder(nn.Module):
     def __init__(self, input_size):
         nn.Module.__init__(self)
         self.e1 = nn.Linear(input_size, 40)
@@ -44,11 +44,10 @@ class VeloEncoderSmall(nn.Module):
         x = self.e2(x)
         x = F.relu(x)
         x = self.e3(x)
-        x = F.relu(x)
         return x
 
 
-class VeloDecoderSmall(nn.Module):
+class VeloDecoder(nn.Module):
     def __init__(self, output_size):
         nn.Module.__init__(self)
         self.e3 = nn.Linear(2, 10)
@@ -61,73 +60,7 @@ class VeloDecoderSmall(nn.Module):
         x = self.e2(x)
         x = F.relu(x)
         x = self.e1(x)
-        x = F.relu(x)
         return x
-
-
-class VeloEncoderMedium(nn.Module):
-    def __init__(self, input_size):
-        nn.Module.__init__(self)
-        self.ep1 = nn.Linear(input_size, 100)
-        self.e = VeloEncoderSmall(100)
-
-    def forward(self, x):
-        x = self.ep1(x)
-        x = F.relu(x)
-        x = self.e(x)
-        return x
-
-
-class VeloDecoderMedium(nn.Module):
-    def __init__(self, output_size):
-        nn.Module.__init__(self)
-        self.e = VeloDecoderSmall(100)
-        self.ep1 = nn.Linear(100, output_size)
-
-    def forward(self, x):
-        x = self.e(x)
-        x = self.ep1(x)
-        x = F.relu(x)
-        return x
-
-
-class VeloEncoderLarge(nn.Module):
-    def __init__(self, input_size):
-        nn.Module.__init__(self)
-        self.ep1 = nn.Linear(input_size, 1000)
-        self.ep2 = nn.Linear(1000, 500)
-        self.ep3 = nn.Linear(250, 100)
-        self.e = VeloEncoderSmall(100)
-
-    def forward(self, x):
-        x = self.ep1(x)
-        x = F.relu(x)
-        x = self.ep2(x)
-        x = F.relu(x)
-        x = self.ep3(x)
-        x = F.relu(x)
-        x = self.e(x)
-        return x
-
-
-class VeloDecoderLarge(nn.Module):
-    def __init__(self, output_size):
-        nn.Module.__init__(self)
-        self.e = VeloDecoderSmall(100)
-        self.ep1 = nn.Linear(100, 250)
-        self.ep2 = nn.Linear(250, 500)
-        self.ep3 = nn.Linear(1000, output_size)
-
-    def forward(self, x):
-        x = self.e(x)
-        x = self.ep1(x)
-        x = F.relu(x)
-        x = self.ep2(x)
-        x = F.relu(x)
-        x = self.ep3(x)
-        x = F.relu(x)
-        return x
-
 
 class VeloAutoencoderLt(pl.LightningModule):
     def __init__(self, encoder, decoder):
@@ -159,3 +92,4 @@ class VeloAutoencoderLt(pl.LightningModule):
         loss = F.mse_loss(y_hat, y)
         self.log("val_loss", loss)
         return loss
+
