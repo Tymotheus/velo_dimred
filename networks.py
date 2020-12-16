@@ -67,7 +67,7 @@ class VeloAutoencoderLt(pl.LightningModule):
         pl.LightningModule.__init__(self)
         self.enc = encoder
         self.dec = decoder
-        self.losses = []
+
 
     def forward(self, x):
         x = self.enc(x)
@@ -83,7 +83,6 @@ class VeloAutoencoderLt(pl.LightningModule):
         y_hat = self(x)
         loss = F.mse_loss(y_hat, y)
         self.log("loss", loss)
-        self.losses.append(loss.item())
         return loss
 
     def validation_step(self, batch, batch_idx):
