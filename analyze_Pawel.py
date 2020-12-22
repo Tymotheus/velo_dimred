@@ -9,7 +9,7 @@ mpl.rcParams["figure.facecolor"] = "white"
 
 mpl.rcParams["axes.facecolor"] = "white"
 mpl.rcParams["savefig.facecolor"] = "white"
-get_ipython().run_line_magic('matplotlib', 'inline')
+
 
 
 # In[2]:
@@ -17,8 +17,7 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 
 
 import pandas as pd
-get_ipython().run_line_magic('load_ext', 'autoreload')
-get_ipython().run_line_magic('autoreload', '2')
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -32,7 +31,7 @@ class MyDS(Tell1Dataset):
 	filename_format = '%Y-%m-%d'
 	filename_regex_format = r'\d{4}-\d{2}-\d{2}.csv'
 
-datapath = "calibrations/"
+datapath = "data/calibrations/"
 data_list = MyDS.get_filepaths_from_dir(datapath)
 mds = MyDS(data_list, read=True)
 
@@ -40,7 +39,7 @@ mds = MyDS(data_list, read=True)
 # In[4]:
 
 
-get_ipython().run_line_magic('load_ext', 'tensorboard')
+
 
 
 # In[5]:
