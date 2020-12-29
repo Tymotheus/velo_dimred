@@ -57,19 +57,22 @@ PARAMS = {'max_epochs': 50,
             'name' : 'name'
          }
 
-neptune_logger = NeptuneLogger(
-    api_key=os.getenv('NEPTUNE_API_TOKEN'),
-    project_name="pawel-drabczyk/velodimred",
-    experiment_name="small-net testing dfh ",
-    params=PARAMS,
-    tags=["small-net","dfh"],  
-    upload_source_files=['analyze_Pawel.ipynb', 'networks.py']
-)
+loggers = dict()
+datasetNames = ['dfh', 'dfh_r', 'dfh_phi', 'dfp', 'dfp_r', 'dfp_phi']
 
-if not os.path.exists('models/{}'.format(PARAMS['name'])):
-    os.makedirs('models/{}'.format(PARAMS['name'])) 
+for d in datasetNames:
+    loggers[d] = NeptuneLogger(
+        api_key=os.getenv('NEPTUNE_API_TOKEN'),
+        project_name="pawel-drabczyk/velodimred",
+        experiment_name="small-net ReLu {}".format(d),
+        params=PARAMS,
+        tags=["small-net","ReLu",d],  
+        upload_source_files=['analyze_Pawel.ipynb', 'networks.py']
+    )
+    if not os.path.exists('models/{}/{}'.format(PARAMS['name'], d)):
+        os.makedirs('models/{}/{}'.format(PARAMS['name'], d)) 
 
-def make_model_trainer(s):
+def make_model_trainer(s, neptune_logger):
     s = 2048
     dec = VeloDecoder(s)
     enc = VeloEncoder(s)
@@ -77,19 +80,19 @@ def make_model_trainer(s):
     tr = pl.Trainer(logger=neptune_logger, max_epochs=PARAMS['max_epochs'], gpus=PARAMS['gpus'])
     return model, tr
 
-def run_experiment(dataset, datasetName):
+def run_experiment(dataset, datasetName, neptune_logger):
     train_loader, test_loader = make_loader(dataset)
     s = dataset.shape[1]
-    model, tr = make_model_trainer(s)
+    model, tr = make_model_trainer(s, neptune_logger)
     tr.fit(model, train_loader, test_loader)
     
     tr.save_checkpoint('models/{}/{}/trained_model.ckpt'.format(PARAMS['name'], datasetName))
     neptune_logger.experiment.log_artifact('models/{}/{}/trained_model.ckpt'.format(PARAMS['name'], datasetName))
 
-run_experiment(dfh, 'dfh')
-#run_experiment(dfh_r, 'dfh_r')
-#run_experiment(dfh_phi, 'dfh_phi')
-#run_experiment(dfp, 'dfp')
-#run_experiment(dfp_r, 'dfp_r')
-#run_experiment(dfp_phi, 'dfp_phi')
+run_experiment(dfh, 'dfh', loggers['dfh'])
+run_experiment(dfh_r, 'dfh_r', loggers['dfh_r'])
+run_experiment(dfh_phi, 'dfh_phi', loggers['dfh_phi'])
+run_experiment(dfp, 'dfp', loggers['dfp'])
+run_experiment(dfp_r, 'dfp_r', loggers['dfp_r'])
+run_experiment(dfp_phi, 'dfp_phi', loggers['dfp_phi'])
 
