@@ -50,49 +50,61 @@ def make_loader(dataset):
     test_loader = DataLoader(dataset = test_tensor)
     return train_loader, test_loader
 
-PARAMS = {'max_epochs': 50,
-          'learning_rate': 0.005,
+PARAMS = {'max_epochs': 120,
+          'learning_rate': 0.0005,
           'batch_size': 32,
           'gpus' : 1,
-            'name' : 'name'
+          # 'name' : 'name',
+          'experiment_name' : 'small-net ReLu much-smaller-lr ',
+          'tags' : ["small-net","ReLu","much-smaller-lr"],
+          'source_files' : ['analyze_Pawel.ipynb', 'networks.py']  
          }
 
-loggers = dict()
-datasetNames = ['dfh', 'dfh_r', 'dfh_phi', 'dfp', 'dfp_r', 'dfp_phi']
+
+
+datasetNames = ['dfh', 'dfhr', 'dfhphi', 'dfp', 'dfpr', 'dfpphi']
 
 for d in datasetNames:
-    loggers[d] = NeptuneLogger(
+    '''loggers[d] = NeptuneLogger(
         api_key=os.getenv('NEPTUNE_API_TOKEN'),
         project_name="pawel-drabczyk/velodimred",
         experiment_name="small-net ReLu {}".format(d),
         params=PARAMS,
         tags=["small-net","ReLu",d],  
         upload_source_files=['analyze_Pawel.ipynb', 'networks.py']
-    )
-    if not os.path.exists('models/{}/{}'.format(PARAMS['name'], d)):
-        os.makedirs('models/{}/{}'.format(PARAMS['name'], d)) 
+    )'''
+    if not os.path.exists('models/{}/{}'.format(PARAMS['experiment_name'], d)):
+        os.makedirs('models/{}/{}'.format(PARAMS['experiment_name'], d)) 
 
-def make_model_trainer(s, neptune_logger):
+def make_model_trainer(s, neptune_logger, lr):
     s = 2048
     dec = VeloDecoder(s)
     enc = VeloEncoder(s)
-    model = VeloAutoencoderLt(enc, dec)
+    model = VeloAutoencoderLt(enc, dec, lr)
     tr = pl.Trainer(logger=neptune_logger, max_epochs=PARAMS['max_epochs'], gpus=PARAMS['gpus'])
     return model, tr
 
-def run_experiment(dataset, datasetName, neptune_logger):
+def run_experiment(dataset, datasetName, par):
     train_loader, test_loader = make_loader(dataset)
     s = dataset.shape[1]
-    model, tr = make_model_trainer(s, neptune_logger)
+    neptune_logger = NeptuneLogger(
+        api_key=os.getenv('NEPTUNE_API_TOKEN'),
+        project_name="pawel-drabczyk/velodimred",
+        experiment_name=par['experiment_name'],
+        params=par,
+        tags=par['tags'] + [datasetName],  
+        upload_source_files= par['source_files']
+    )
+    model, tr = make_model_trainer(s, neptune_logger, par['learning_rate'])
     tr.fit(model, train_loader, test_loader)
     
-    tr.save_checkpoint('models/{}/{}/trained_model.ckpt'.format(PARAMS['name'], datasetName))
-    neptune_logger.experiment.log_artifact('models/{}/{}/trained_model.ckpt'.format(PARAMS['name'], datasetName))
+    tr.save_checkpoint('models/{}/{}/trained_model.ckpt'.format(PARAMS['experiment_name'], datasetName))
+    neptune_logger.experiment.log_artifact('models/{}/{}/trained_model.ckpt'.format(PARAMS['experiment_name'], datasetName))
 
-run_experiment(dfh, 'dfh', loggers['dfh'])
-run_experiment(dfh_r, 'dfh_r', loggers['dfh_r'])
-run_experiment(dfh_phi, 'dfh_phi', loggers['dfh_phi'])
-run_experiment(dfp, 'dfp', loggers['dfp'])
-run_experiment(dfp_r, 'dfp_r', loggers['dfp_r'])
-run_experiment(dfp_phi, 'dfp_phi', loggers['dfp_phi'])
+run_experiment(dfh, 'dfh', PARAMS)
+run_experiment(dfh_r, 'dfhr', PARAMS)
+run_experiment(dfh_phi, 'dfhphi', PARAMS)
+run_experiment(dfp, 'dfp', PARAMS)
+run_experiment(dfp_r, 'dfpr', PARAMS)
+run_experiment(dfp_phi, 'dfpphi', PARAMS)
 

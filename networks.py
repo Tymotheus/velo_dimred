@@ -63,10 +63,11 @@ class VeloDecoder(nn.Module):
         return x
 
 class VeloAutoencoderLt(pl.LightningModule):
-    def __init__(self, encoder, decoder):
+    def __init__(self, encoder, decoder, learning_rate):
         pl.LightningModule.__init__(self)
         self.enc = encoder
         self.dec = decoder
+        self.lr = learning_rate
 
 
     def forward(self, x):
@@ -75,7 +76,7 @@ class VeloAutoencoderLt(pl.LightningModule):
         return x
 
     def configure_optimizers(self):
-        optimizer = optim.Adam(self.parameters())
+        optimizer = optim.Adam(self.parameters(), lr=self.lr)
         return optimizer
 
     def training_step(self, batch, batch_idx):
