@@ -52,14 +52,13 @@ def make_loader(dataset):
     test_loader = DataLoader(dataset = test_tensor)
     return train_loader, test_loader
 
-PARAMS = {'max_epochs': 10,
-          'learning_rate': 0.0005,
+PARAMS = {'max_epochs': 50,
+          'learning_rate': 0.05,
           'batch_size': 32,
           'gpus' : 1,
-          # 'name' : 'name',
           'experiment_name' : 'small-net ReLu ReduceLROnPlateau ',
           'tags' : ["small-net","ReLu","ReduceLROnPlateau"],
-          'source_files' : ['analyze_Pawel.ipynb', 'networks.py']  
+          'source_files' : ['analyze_Pawel.py', 'networks.py']  
          }
 
 
@@ -67,14 +66,6 @@ PARAMS = {'max_epochs': 10,
 datasetNames = ['dfh', 'dfhr', 'dfhphi', 'dfp', 'dfpr', 'dfpphi']
 
 for d in datasetNames:
-    '''loggers[d] = NeptuneLogger(
-        api_key=os.getenv('NEPTUNE_API_TOKEN'),
-        project_name="pawel-drabczyk/velodimred",
-        experiment_name="small-net ReLu {}".format(d),
-        params=PARAMS,
-        tags=["small-net","ReLu",d],  
-        upload_source_files=['analyze_Pawel.ipynb', 'networks.py']
-    )'''
     if not os.path.exists('models/{}/{}'.format(PARAMS['experiment_name'], d)):
         os.makedirs('models/{}/{}'.format(PARAMS['experiment_name'], d)) 
 
@@ -98,7 +89,6 @@ def run_experiment(dataset, datasetName, par):
         tags=par['tags'] + [datasetName],  
         upload_source_files= par['source_files']
     )
-
 
     model, tr = make_model_trainer(s, neptune_logger, par['learning_rate'])
     tr.fit(model, train_loader, test_loader)
