@@ -34,6 +34,8 @@ from sklearn.model_selection import train_test_split
 from pytorch_lightning.loggers import TensorBoardLogger
 import neptune
 from pytorch_lightning.loggers.neptune import NeptuneLogger
+from pytorch_lightning.callbacks import LearningRateMonitor
+
 import os
 from datetime import datetime
 datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
@@ -50,13 +52,13 @@ def make_loader(dataset):
     test_loader = DataLoader(dataset = test_tensor)
     return train_loader, test_loader
 
-PARAMS = {'max_epochs': 120,
+PARAMS = {'max_epochs': 10,
           'learning_rate': 0.0005,
           'batch_size': 32,
           'gpus' : 1,
           # 'name' : 'name',
-          'experiment_name' : 'small-net ReLu much-smaller-lr ',
-          'tags' : ["small-net","ReLu","much-smaller-lr"],
+          'experiment_name' : 'small-net ReLu ReduceLROnPlateau ',
+          'tags' : ["small-net","ReLu","ReduceLROnPlateau"],
           'source_files' : ['analyze_Pawel.ipynb', 'networks.py']  
          }
 
@@ -81,7 +83,8 @@ def make_model_trainer(s, neptune_logger, lr):
     dec = VeloDecoder(s)
     enc = VeloEncoder(s)
     model = VeloAutoencoderLt(enc, dec, lr)
-    tr = pl.Trainer(logger=neptune_logger, max_epochs=PARAMS['max_epochs'], gpus=PARAMS['gpus'])
+    lr_monitor = LearningRateMonitor(logging_interval='step')
+    tr = pl.Trainer(logger=neptune_logger, callbacks=[lr_monitor],  max_epochs=PARAMS['max_epochs'], gpus=PARAMS['gpus'])
     return model, tr
 
 def run_experiment(dataset, datasetName, par):
@@ -95,6 +98,8 @@ def run_experiment(dataset, datasetName, par):
         tags=par['tags'] + [datasetName],  
         upload_source_files= par['source_files']
     )
+
+
     model, tr = make_model_trainer(s, neptune_logger, par['learning_rate'])
     tr.fit(model, train_loader, test_loader)
     
