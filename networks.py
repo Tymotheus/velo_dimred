@@ -42,7 +42,7 @@ class VeloEncoder(nn.Module):
         x = self.e1(x)
         x = F.relu(x)
         x = self.e2(x)
-        x = F.relu(x)
+        x = F.sigmoid(x)
         x = self.e3(x)
         return x
 
@@ -56,7 +56,7 @@ class VeloDecoder(nn.Module):
 
     def forward(self, x):
         x = self.e3(x)
-        x = F.relu(x)
+        x = F.sigmoid(x)
         x = self.e2(x)
         x = F.relu(x)
         x = self.e1(x)
@@ -78,16 +78,16 @@ class VeloAutoencoderLt(pl.LightningModule):
         optimizer = optim.Adam(self.parameters(), lr=self.lr)
         #lambda1 = lambda epoch: 0.95 ** epoch
         #scheduler = torch.optim.lr_scheduler.LambdaLR( optimizer, lr_lambda=lambda1 )
-        '''scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,
                                                                mode='min',
-                                                               factor=0.2,
-                                                               patience=2,
-                                                               min_lr=1e-6,
-                                                               verbose=True)'''
+                                                               factor=0.8,
+                                                               patience=7,
+                                                               min_lr=0.001,
+                                                               verbose=True)
         return {
         'optimizer': optimizer,
-        #'lr_scheduler': scheduler,
-        #'monitor' : 'loss'
+        'lr_scheduler': scheduler,
+        'monitor' : 'loss'
     }
 
     def training_step(self, batch, batch_idx):

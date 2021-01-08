@@ -53,11 +53,11 @@ def make_loader(dataset):
     return train_loader, test_loader
 
 PARAMS = {'max_epochs': 50,
-          'learning_rate': 0.05,
+          'learning_rate': 0.02,
           'batch_size': 32,
           'gpus' : 1,
-          'experiment_name' : 'small-net ReLu ReduceLROnPlateau ',
-          'tags' : ["small-net","ReLu","ReduceLROnPlateau"],
+          'experiment_name' : 'small-net ReLu sigmoid-last ReduceLROnPlateau-soft',
+          'tags' : ["small-net","ReLu", "sigmoid-last","ReduceLROnPlateau-soft"],
           'source_files' : ['analyze_Pawel.py', 'networks.py']  
          }
 
