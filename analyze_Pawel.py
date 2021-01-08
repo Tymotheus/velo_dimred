@@ -46,28 +46,34 @@ def make_loader(dataset):
     train_data = torch.tensor(train.values, dtype=torch.float)
     test_target = torch.tensor(test.values, dtype=torch.float)
     test_data = torch.tensor(test.values, dtype=torch.float)
-    train_tensor = TensorDataset(train_data, train_target) 
-    test_tensor = TensorDataset(test_data, test_target) 
+    train_tensor = TensorDataset(train_data, train_target)
+    test_tensor = TensorDataset(test_data, test_target)
     train_loader = DataLoader(dataset = train_tensor)
     test_loader = DataLoader(dataset = test_tensor)
     return train_loader, test_loader
 
-PARAMS = {'max_epochs': 50,
+PARAMS = {'max_epochs': 30,
           'learning_rate': 0.05,
           'batch_size': 32,
           'gpus' : 1,
-          'experiment_name' : 'small-net ReLu ReduceLROnPlateau ',
-          'tags' : ["small-net","ReLu","ReduceLROnPlateau"],
-          'source_files' : ['analyze_Pawel.py', 'networks.py']  
+          'experiment_name' : 'LeakyReLU_small-net_ReduceLROnPlateau',
+          'tags' : ["small-net","LeakyReLU","ReduceLROnPlateau"],
+          'source_files' : ['analyze_Pawel.py', 'networks.py']
          }
 
 
 
 datasetNames = ['dfh', 'dfhr', 'dfhphi', 'dfp', 'dfpr', 'dfpphi']
 
+# for d in datasetNames:
+#     if not os.path.exists('models\{}\{}'.format(PARAMS['experiment_name'], d)):
+#         os.makedirs('models\{}\{}'.format(PARAMS['experiment_name'], d))
+
+#trying to use os path join
 for d in datasetNames:
-    if not os.path.exists('models/{}/{}'.format(PARAMS['experiment_name'], d)):
-        os.makedirs('models/{}/{}'.format(PARAMS['experiment_name'], d)) 
+    if not os.path.exists(os.path.join('models', PARAMS['experiment_name'], d)):
+        os.makedirs(os.path.join('models', PARAMS['experiment_name'], d))
+
 
 def make_model_trainer(s, neptune_logger, lr):
     s = 2048
@@ -86,15 +92,18 @@ def run_experiment(dataset, datasetName, par):
         project_name="pawel-drabczyk/velodimred",
         experiment_name=par['experiment_name'],
         params=par,
-        tags=par['tags'] + [datasetName],  
+        tags=par['tags'] + [datasetName],
         upload_source_files= par['source_files']
     )
 
     model, tr = make_model_trainer(s, neptune_logger, par['learning_rate'])
     tr.fit(model, train_loader, test_loader)
-    
-    tr.save_checkpoint('models/{}/{}/trained_model.ckpt'.format(PARAMS['experiment_name'], datasetName))
-    neptune_logger.experiment.log_artifact('models/{}/{}/trained_model.ckpt'.format(PARAMS['experiment_name'], datasetName))
+    # tr.save_checkpoint('models\{}\{}\trained_model.ckpt'.format(PARAMS['experiment_name'], datasetName))
+    # neptune_logger.experiment.log_artifact('models\{}\{}\trained_model.ckpt'.format(PARAMS['experiment_name'], datasetName))
+
+	#implementing os path join
+    tr.save_checkpoint(os.path.join('models', PARAMS['experiment_name'], datasetName,"trained_model.ckpt" ))
+    neptune_logger.experiment.log_artifact(os.path.join('models', PARAMS['experiment_name'], datasetName,"trained_model.ckpt" ))
 
 run_experiment(dfh, 'dfh', PARAMS)
 run_experiment(dfh_r, 'dfhr', PARAMS)
@@ -102,4 +111,3 @@ run_experiment(dfh_phi, 'dfhphi', PARAMS)
 run_experiment(dfp, 'dfp', PARAMS)
 run_experiment(dfp_r, 'dfpr', PARAMS)
 run_experiment(dfp_phi, 'dfpphi', PARAMS)
-
