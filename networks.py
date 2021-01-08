@@ -63,11 +63,11 @@ class VeloDecoder(nn.Module):
         return x
 
 class VeloAutoencoderLt(pl.LightningModule):
-    def __init__(self, encoder, decoder):
+    def __init__(self, encoder, decoder, learning_rate):
         pl.LightningModule.__init__(self)
         self.enc = encoder
         self.dec = decoder
-
+        self.lr = learning_rate
 
     def forward(self, x):
         x = self.enc(x)
@@ -75,8 +75,20 @@ class VeloAutoencoderLt(pl.LightningModule):
         return x
 
     def configure_optimizers(self):
-        optimizer = optim.Adam(self.parameters())
-        return optimizer
+        optimizer = optim.Adam(self.parameters(), lr=self.lr)
+        #lambda1 = lambda epoch: 0.95 ** epoch
+        #scheduler = torch.optim.lr_scheduler.LambdaLR( optimizer, lr_lambda=lambda1 )
+        '''scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,
+                                                               mode='min',
+                                                               factor=0.2,
+                                                               patience=2,
+                                                               min_lr=1e-6,
+                                                               verbose=True)'''
+        return {
+        'optimizer': optimizer,
+        #'lr_scheduler': scheduler,
+        #'monitor' : 'loss'
+    }
 
     def training_step(self, batch, batch_idx):
         x, y = batch
