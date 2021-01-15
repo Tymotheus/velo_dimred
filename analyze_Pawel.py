@@ -63,12 +63,10 @@ PARAMS = {'max_epochs': 50,
           'learning_rate': 0.05,
           'batch_size': 32,
           'gpus' : 1,
-          'experiment_name' : 'testing',
-          'tags' : ["testing"],
-          'source_files' : ['analyze_Pawel.py', 'networks.py']  
+          'experiment_name' : 'Medium-net ReLU Adam',
+          'tags' : ["Medium-net", "ReLU", "Adam"],
+          'source_files' : ['analyze_Pawel.py', 'networks.py']
          }
-
-
 
 datasetNames = ['dfh', 'dfhr', 'dfhphi', 'dfp', 'dfpr', 'dfpphi']
 
