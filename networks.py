@@ -34,36 +34,43 @@ def get_dataset(path):
 class VeloEncoder(nn.Module):
     def __init__(self, input_size):
         nn.Module.__init__(self)
-        self.e1 = nn.Linear(input_size, 40)
-        self.e2 = nn.Linear(40, 10)
-        self.e3 = nn.Linear(10, 2)
+
+        self.e1 = nn.Linear(input_size, 100)
+        self.e2 = nn.Linear(100, 40)
+        self.e3 = nn.Linear(40, 20)
+        self.e4 = nn.Linear(20, 2)
 
     def forward(self, x):
         x = self.e1(x)
-        x = nn.LeakyReLU(0.01)(x)
+        x = F.relu(x)
         x = self.e2(x)
-        x = nn.LeakyReLU(0.01)(x)
+        x = F.relu(x)
         x = self.e3(x)
+        x = F.relu(x)
+        x = self.e4(x)
         return x
 
 
 class VeloDecoder(nn.Module):
     def __init__(self, output_size):
         nn.Module.__init__(self)
-        self.e3 = nn.Linear(2, 10)
-        self.e2 = nn.Linear(10, 40)
-        self.e1 = nn.Linear(40, output_size)
+        self.e4 = nn.Linear(2, 20)
+        self.e3 = nn.Linear(20, 40)
+        self.e2 = nn.Linear(40, 100)
+        self.e1 = nn.Linear(100, output_size)
 
     def forward(self, x):
+        x = self.e4(x)
+        x = F.relu(x)
         x = self.e3(x)
-        x = nn.LeakyReLU(0.01)(x)
+        x = F.relu(x)
         x = self.e2(x)
-        x = nn.LeakyReLU(0.01)(x)
+        x = F.relu(x)
         x = self.e1(x)
         return x
 
 class VeloAutoencoderLt(pl.LightningModule):
-    def __init__(self, encoder, decoder, learning_rate):
+    def __init__(self, encoder=VeloEncoder(2048), decoder=VeloDecoder(2048), learning_rate=0.666):
         pl.LightningModule.__init__(self)
         self.enc = encoder
         self.dec = decoder
