@@ -59,22 +59,17 @@ def make_loader(dataset):
     test_loader = DataLoader(dataset = test_tensor)
     return train_loader, test_loader
 
-PARAMS = {'max_epochs': 50,
+PARAMS = {'max_epochs': 1,
           'learning_rate': 0.05,
           'batch_size': 32,
           'gpus' : 1,
-          'experiment_name' : 'Medium-net ReLU Adam',
-          'tags' : ["Medium-net", "ReLU", "Adam"],
+          'experiment_name' : 'testing',
+          'tags' : ["testing"],
           'source_files' : ['analyze_Pawel.py', 'networks.py']
          }
 
 datasetNames = ['dfh', 'dfhr', 'dfhphi', 'dfp', 'dfpr', 'dfpphi']
 
-# for d in datasetNames:
-#     if not os.path.exists('models\{}\{}'.format(PARAMS['experiment_name'], d)):
-#         os.makedirs('models\{}\{}'.format(PARAMS['experiment_name'], d))
-
-#trying to use os path join
 for d in datasetNames:
     if not os.path.exists(os.path.join('models', PARAMS['experiment_name'], d)):
         os.makedirs(os.path.join('models', PARAMS['experiment_name'], d))
@@ -89,58 +84,7 @@ def make_model_trainer(s, neptune_logger, lr):
     tr = pl.Trainer(logger=neptune_logger, callbacks=[lr_monitor],  max_epochs=PARAMS['max_epochs'], gpus=PARAMS['gpus'])
     return model, tr
 
-def plot(reducedData, dataset, datasetName, metadata, exp_name, exp_id):
-    model_path = os.path.join('models', exp_name, datasetName, 'trained_model.ckpt')
-    if not os.path.exists(model_path):
-        logging.info('{} does not exists, exiting'.format(model_path) )
-        exit()
-
-    #model = VeloAutoencoderLt.load_from_checkpoint(checkpoint_path=model_path)
-    #model.freeze()
-    #reduced_data = model.enc.forward(torch.tensor(dataset.values, dtype=torch.float))
-    #reduced_data = reduced_data.detach().numpy()
-    
-    x2DList = []
-    y2DList = []
-    sensorNumberList = [0]
-   
-    tempSensor = 0
-    counter = 0
-    tempX = []
-    tempY = []    
-    for sensor in metadata['sensor']:
-        if int(sensor)==tempSensor:
-            tempX.append(reducedData[counter][0])
-            tempY.append(reducedData[counter][1])
-        else:
-            x2DList.append(tempX)
-            y2DList.append(tempY)
-            tempX = [reducedData[counter][0]]
-            tempY = [reducedData[counter][1]]
-            sensorNumberList.append( int(sensor) )
-        counter = counter + 1
-    x2DList.append(tempX)
-    y2DList.append(tempY)
-
-    fig = plt.figure()
-    ax1 = fig.add_subplot(111)
-    alpha = 0.4
-    for sensorNumber in range( len(sensorNumberList) ):
-        plt.scatter(x2DList[sensorNumber],y2DList[sensorNumber], edgecolor='none', alpha=alpha, label=sensorNumberList[sensorNumber] )
-    plt.xlabel('Reduced variable 1')
-    plt.ylabel('Reduced variable 2')
-    plt.autoscale()  
-    plt.show()
-    plt.savefig( os.path.join('models', exp_name, datasetName,'reduced.png') )
-    
-    #project = neptune.init('pawel-drabczyk/velodimred')
-    #my_exp = project.get_experiments(id=exp_id)[0]
-
-    #my_exp.append_tag('plot-added')
-    #log_chart('matplotlib-interactive', fig, my_exp)
-    
-
-def run_experiment(dataset, datasetName, metadata,par):
+def run_experiment(dataset, datasetName,par):
     train_loader, test_loader = make_loader(dataset)
     s = dataset.shape[1]
     neptune_logger = NeptuneLogger(
@@ -155,18 +99,12 @@ def run_experiment(dataset, datasetName, metadata,par):
     model, tr = make_model_trainer(s, neptune_logger, par['learning_rate'])
     tr.fit(model, train_loader, test_loader)
 
-    tr.save_checkpoint(os.path.join('models', PARAMS['experiment_name'], datasetName,"trained_model.ckpt" ))
+    torch.save(model, os.path.join('models', PARAMS['experiment_name'], datasetName,"trained_model.pt" ) )
     neptune_logger.experiment.log_artifact(os.path.join('models', PARAMS['experiment_name'], datasetName,"trained_model.ckpt" ))
 
-    reducedData = model.enc.forward(torch.tensor(dataset.values, dtype=torch.float))
-    reducedData = reducedData.detach().numpy()
-    
-    plot(reducedData, dataset, datasetName, metadata, par['experiment_name'], 'exp_id')
-
-
-run_experiment(dfh, 'dfh', dfh_metadata, PARAMS)
-#run_experiment(dfh_r, 'dfhr', PARAMS)
-#run_experiment(dfh_phi, 'dfhphi', PARAMS)
-#run_experiment(dfp, 'dfp', PARAMS)
-#run_experiment(dfp_r, 'dfpr', PARAMS)
-#run_experiment(dfp_phi, 'dfpphi', PARAMS)
+run_experiment(dfh, 'dfh', PARAMS)
+run_experiment(dfh_r, 'dfhr', PARAMS)
+run_experiment(dfh_phi, 'dfhphi', PARAMS)
+run_experiment(dfp, 'dfp', PARAMS)
+run_experiment(dfp_r, 'dfpr', PARAMS)
+run_experiment(dfp_phi, 'dfpphi', PARAMS)
