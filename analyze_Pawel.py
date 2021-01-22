@@ -1,28 +1,44 @@
 #!/usr/bin/env python
 # coding: utf-8
-
-import matplotlib as mpl
-mpl.rcParams["figure.facecolor"] = "white"
-mpl.rcParams["axes.facecolor"] = "white"
-mpl.rcParams["savefig.facecolor"] = "white"
-
+import os
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import os
+import torch
+import pytorch_lightning as pl
+from torch.utils.data import DataLoader, TensorDataset
+from sklearn.model_selection import train_test_split
+from pytorch_lightning.loggers import TensorBoardLogger
+from pytorch_lightning.loggers.neptune import NeptuneLogger
+from pytorch_lightning.callbacks import LearningRateMonitor
+from datetime import datetime
+datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
+import neptune
 
+#custom components
+from networks import VeloDecoder, VeloEncoder, VeloAutoencoderLt
 from calibration_dataset import Tell1Dataset
+
+#trainig parameters
+PARAMS = {'max_epochs': 1,
+          'learning_rate': 0.05,
+          'batch_size': 32,
+          'gpus' : 1,
+          'experiment_name' : 'testing',
+          'tags' : ["test"],
+          'source_files' : ['analyze_Pawel.py', 'networks.py']
+         }
+
+datasetNames = ['dfh', 'dfhr', 'dfhphi', 'dfp', 'dfpr', 'dfpphi']
+
+
 class MyDS(Tell1Dataset):
 	filename_format = '%Y-%m-%d'
 	filename_regex_format = r'\d{4}-\d{2}-\d{2}.csv'
+
+#loading the data
 datapath = os.path.join("data", "calibrations")
 data_list = MyDS.get_filepaths_from_dir(datapath)
 mds = MyDS(data_list, read=True)
-
-from networks import VeloDecoder, VeloEncoder, VeloAutoencoderLt
-import pytorch_lightning as pl
-import torch
-from torch.utils.data import DataLoader, TensorDataset
 
 dfh = mds.dfh.df.iloc[:,9:]
 dfh_r = mds.dfh['R'].df.iloc[:,9:]
@@ -38,14 +54,6 @@ dfp_metadata = mds.dfp.df.iloc[:,:9]
 dfp_r_metadata = mds.dfp['R'].df.iloc[:,:9]
 dfp_phi_metadata = mds.dfp['phi'].df.iloc[:,:9]
 
-from sklearn.model_selection import train_test_split
-from pytorch_lightning.loggers import TensorBoardLogger
-import neptune
-from pytorch_lightning.loggers.neptune import NeptuneLogger
-from pytorch_lightning.callbacks import LearningRateMonitor
-
-from datetime import datetime
-datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
 
 def make_loader(dataset):
     train, test = train_test_split(dataset, test_size=0.2)
@@ -58,21 +66,6 @@ def make_loader(dataset):
     train_loader = DataLoader(dataset = train_tensor)
     test_loader = DataLoader(dataset = test_tensor)
     return train_loader, test_loader
-
-PARAMS = {'max_epochs': 1,
-          'learning_rate': 0.05,
-          'batch_size': 32,
-          'gpus' : 1,
-          'experiment_name' : 'testing',
-          'tags' : ["small-net", "ReLU"],
-          'source_files' : ['analyze_Pawel.py', 'networks.py']
-         }
-
-datasetNames = ['dfh', 'dfhr', 'dfhphi', 'dfp', 'dfpr', 'dfpphi']
-
-for d in datasetNames:
-    if not os.path.exists(os.path.join('models', PARAMS['experiment_name'], d)):
-        os.makedirs(os.path.join('models', PARAMS['experiment_name'], d))
 
 
 def make_model_trainer(s, neptune_logger, lr):
@@ -95,16 +88,20 @@ def run_experiment(dataset, datasetName,par):
         tags=par['tags'] + [datasetName],
         upload_source_files= par['source_files']
     )
-
     model, tr = make_model_trainer(s, neptune_logger, par['learning_rate'])
     tr.fit(model, train_loader, test_loader)
 
     torch.save(model, os.path.join('models', PARAMS['experiment_name'], datasetName,"trained_model.ckpt" ) )
     neptune_logger.experiment.log_artifact(os.path.join('models', PARAMS['experiment_name'], datasetName,"trained_model.ckpt" ))
 
-run_experiment(dfh, 'dfh', PARAMS)
-run_experiment(dfh_r, 'dfhr', PARAMS)
-run_experiment(dfh_phi, 'dfhphi', PARAMS)
-run_experiment(dfp, 'dfp', PARAMS)
-run_experiment(dfp_r, 'dfpr', PARAMS)
-run_experiment(dfp_phi, 'dfpphi', PARAMS)
+if __name__ == "__main__":
+	for d in datasetNames:
+	    if not os.path.exists(os.path.join('models', PARAMS['experiment_name'], d)):
+	        os.makedirs(os.path.join('models', PARAMS['experiment_name'], d))
+
+	run_experiment(dfh, 'dfh', PARAMS)
+	run_experiment(dfh_r, 'dfhr', PARAMS)
+	run_experiment(dfh_phi, 'dfhphi', PARAMS)
+	run_experiment(dfp, 'dfp', PARAMS)
+	run_experiment(dfp_r, 'dfpr', PARAMS)
+	run_experiment(dfp_phi, 'dfpphi', PARAMS)
