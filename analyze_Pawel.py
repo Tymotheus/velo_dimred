@@ -9,12 +9,13 @@ mpl.rcParams["savefig.facecolor"] = "white"
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 from calibration_dataset import Tell1Dataset
 class MyDS(Tell1Dataset):
 	filename_format = '%Y-%m-%d'
 	filename_regex_format = r'\d{4}-\d{2}-\d{2}.csv'
-datapath = "data/calibrations/"
+datapath = os.path.join("data", "calibrations")
 data_list = MyDS.get_filepaths_from_dir(datapath)
 mds = MyDS(data_list, read=True)
 
@@ -43,7 +44,6 @@ import neptune
 from pytorch_lightning.loggers.neptune import NeptuneLogger
 from pytorch_lightning.callbacks import LearningRateMonitor
 
-import os
 from datetime import datetime
 datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
 
@@ -64,7 +64,7 @@ PARAMS = {'max_epochs': 1,
           'batch_size': 32,
           'gpus' : 1,
           'experiment_name' : 'testing',
-          'tags' : ["testing"],
+          'tags' : ["small-net", "ReLU"],
           'source_files' : ['analyze_Pawel.py', 'networks.py']
          }
 
@@ -99,7 +99,7 @@ def run_experiment(dataset, datasetName,par):
     model, tr = make_model_trainer(s, neptune_logger, par['learning_rate'])
     tr.fit(model, train_loader, test_loader)
 
-    torch.save(model, os.path.join('models', PARAMS['experiment_name'], datasetName,"trained_model.pt" ) )
+    torch.save(model, os.path.join('models', PARAMS['experiment_name'], datasetName,"trained_model.ckpt" ) )
     neptune_logger.experiment.log_artifact(os.path.join('models', PARAMS['experiment_name'], datasetName,"trained_model.ckpt" ))
 
 run_experiment(dfh, 'dfh', PARAMS)
