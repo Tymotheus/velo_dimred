@@ -169,11 +169,11 @@ import torch.nn as nn
 from networks import VeloDecoder, VeloEncoder, VeloAutoencoderLt
 
 logging.basicConfig(level=logging.INFO)
-PARAMS = {'max_epochs': 50,
+PARAMS = {'max_epochs': 1,
           'learning_rate': 0.05,
           'batch_size': 32,
           'gpus' : 1,
-          'experiment_name' : 'testing',
+          'experiment_name' : 'relu sigmoid-last small-net',
           'tags' : ["testing"],
           'source_files' : ['analyze_Pawel.py', 'networks.py']  
          }

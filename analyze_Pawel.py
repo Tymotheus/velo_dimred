@@ -14,17 +14,19 @@ from datetime import datetime
 datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
 import neptune
 
+
+
 #custom components
 from networks import VeloDecoder, VeloEncoder, VeloAutoencoderLt
 from calibration_dataset import Tell1Dataset
 
 #trainig parameters
-PARAMS = {'max_epochs': 1,
-          'learning_rate': 0.05,
+PARAMS = {'max_epochs': 10,
+          'learning_rate': 0.005,
           'batch_size': 32,
           'gpus' : 1,
-          'experiment_name' : 'testing',
-          'tags' : ["test"],
+          'experiment_name' : 'debuging',
+          'tags' : ['debuging'],
           'source_files' : ['analyze_Pawel.py', 'networks.py']
          }
 
@@ -47,12 +49,22 @@ dfp = mds.dfp.df.iloc[:,9:]
 dfp_r = mds.dfp['R'].df.iloc[:,9:]
 dfp_phi = mds.dfp['phi'].df.iloc[:,9:]
 
+
 dfh_metadata = mds.dfh.df.iloc[:,:9]
 dfh_r_metadata = mds.dfh['R'].df.iloc[:,:9]
 dfh_phi_metadata = mds.dfh['phi'].df.iloc[:,:9]
 dfp_metadata = mds.dfp.df.iloc[:,:9]
 dfp_r_metadata = mds.dfp['R'].df.iloc[:,:9]
 dfp_phi_metadata = mds.dfp['phi'].df.iloc[:,:9]
+
+#scaling input data
+dfh = dfh.sub(dfh.mean(1), axis=0).div(dfh.std(1), axis=0)
+dfh_r = dfh_r.sub(dfh_r.mean(1), axis=0).div(dfh_r.std(1), axis=0)
+dfh_phi = dfh_phi.sub(dfh_phi.mean(1), axis=0).div(dfh_phi.std(1), axis=0)
+dfp = dfp.sub(dfp.mean(1), axis=0).div(dfp.std(1), axis=0)
+dfp_r = dfp_r.sub(dfp_r.mean(1), axis=0).div(dfp_r.std(1), axis=0)
+dfp_phi = dfp_phi.sub(dfp_phi.mean(1), axis=0).div(dfp_phi.std(1), axis=0)
+
 
 
 def make_loader(dataset):
@@ -100,8 +112,8 @@ if __name__ == "__main__":
 	        os.makedirs(os.path.join('models', PARAMS['experiment_name'], d))
 
 	run_experiment(dfh, 'dfh', PARAMS)
-	run_experiment(dfh_r, 'dfhr', PARAMS)
-	run_experiment(dfh_phi, 'dfhphi', PARAMS)
-	run_experiment(dfp, 'dfp', PARAMS)
-	run_experiment(dfp_r, 'dfpr', PARAMS)
-	run_experiment(dfp_phi, 'dfpphi', PARAMS)
+	#run_experiment(dfh_r, 'dfhr', PARAMS)
+	#run_experiment(dfh_phi, 'dfhphi', PARAMS)
+	#run_experiment(dfp, 'dfp', PARAMS)
+	#run_experiment(dfp_r, 'dfpr', PARAMS)
+	#run_experiment(dfp_phi, 'dfpphi', PARAMS)
