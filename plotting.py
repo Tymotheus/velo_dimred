@@ -8,16 +8,18 @@ import torch
 import logging
 logging.basicConfig(level=logging.INFO)
 import os
-
+import neptune
 from calibration_dataset import Tell1Dataset
+
 
 PARAMS = {'max_epochs': 1,
           'learning_rate': 0.05,
           'batch_size': 64,
           'gpus' : 1,
-          'experiment_name' : 'debuging standarized SGD no-dropout huge-batches relu',
+          'experiment_name' : 'debuging standarized SGD small-dropout bigger-batches relu',
           'tags' : ["testing"],
-          'source_files' : ['analyze_Pawel.py', 'networks.py']
+          'source_files' : ['analyze_Pawel.py', 'networks.py'],
+          'experiment_id' : 'VEL-368'
          }
 
 datasetNames = ['dfh', 'dfhr', 'dfhphi', 'dfp', 'dfpr', 'dfpphi']
@@ -98,13 +100,12 @@ def plot(dataset, datasetName, metadata, exp_name, exp_id):
     plt.show()
     fig.savefig( os.path.join('models', exp_name, datasetName,'reduced.png') )
     
-    #project = neptune.init('pawel-drabczyk/velodimred')
-    #my_exp = project.get_experiments(id=exp_id)[0]
+    project = neptune.init('pawel-drabczyk/velodimred')
+    my_exp = project.get_experiments(id=exp_id)[0]
+    my_exp.append_tag('plot-added')
+    my_exp.log_image('reducedData', fig, image_name='reducedData')
 
-    #my_exp.append_tag('plot-added')
-    #log_chart('matplotlib-interactive', fig, my_exp)
-
-plot(dfh, 'dfh', dfh_metadata, PARAMS['experiment_name'], 'VEL-335')
+plot(dfh, 'dfh', dfh_metadata, PARAMS['experiment_name'], PARAMS['experiment_id'])
 
 #run_experiment(dfh, 'dfh', dfh_sensor_numbers, PARAMS)
 #run_experiment(dfh_r, 'dfhr', PARAMS)

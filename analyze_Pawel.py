@@ -23,10 +23,10 @@ from calibration_dataset import Tell1Dataset
 #trainig parameters
 PARAMS = {'max_epochs': 50,
           'learning_rate': 0.02,
-          'batch_size': 256,
+          'batch_size': 64,
           'gpus' : 1,
-          'experiment_name' : 'debuging standarized SGD no-dropout huge-batches relu',
-          'tags' : ['debuging','standarized','SGD','no-dropout','huge-batches','relu'],
+          'experiment_name' : 'debuging standarized SGD small-dropout bigger-batches relu',
+          'tags' : ['debuging','standarized','SGD','small-dropout','bigger-batches','relu'],
           'source_files' : ['analyze_Pawel.py', 'networks.py']
          }
 
