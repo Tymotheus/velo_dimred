@@ -21,12 +21,12 @@ from networks import VeloDecoder, VeloEncoder, VeloAutoencoderLt
 from calibration_dataset import Tell1Dataset
 
 #trainig parameters
-PARAMS = {'max_epochs': 10,
-          'learning_rate': 0.005,
-          'batch_size': 32,
+PARAMS = {'max_epochs': 50,
+          'learning_rate': 0.02,
+          'batch_size': 256,
           'gpus' : 1,
-          'experiment_name' : 'debuging',
-          'tags' : ['debuging'],
+          'experiment_name' : 'debuging standarized SGD no-dropout huge-batches relu',
+          'tags' : ['debuging','standarized','SGD','no-dropout','huge-batches','relu'],
           'source_files' : ['analyze_Pawel.py', 'networks.py']
          }
 
