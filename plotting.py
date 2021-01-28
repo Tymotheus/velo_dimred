@@ -16,10 +16,10 @@ PARAMS = {'max_epochs': 1,
           'learning_rate': 0.05,
           'batch_size': 64,
           'gpus' : 1,
-          'experiment_name' : 'debuging standarized SGD small-dropout bigger-batches relu',
+          'experiment_name' : 'debuging standarized SGD no-dropout bigger-batches relu shuffle',
           'tags' : ["testing"],
           'source_files' : ['analyze_Pawel.py', 'networks.py'],
-          'experiment_id' : 'VEL-368'
+          'experiment_id' : 'VEL-369'
          }
 
 datasetNames = ['dfh', 'dfhr', 'dfhphi', 'dfp', 'dfpr', 'dfpphi']

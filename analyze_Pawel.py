@@ -21,12 +21,12 @@ from networks import VeloDecoder, VeloEncoder, VeloAutoencoderLt
 from calibration_dataset import Tell1Dataset
 
 #trainig parameters
-PARAMS = {'max_epochs': 50,
+PARAMS = {'max_epochs': 70,
           'learning_rate': 0.02,
           'batch_size': 64,
           'gpus' : 1,
-          'experiment_name' : 'debuging standarized SGD small-dropout bigger-batches relu',
-          'tags' : ['debuging','standarized','SGD','small-dropout','bigger-batches','relu'],
+          'experiment_name' : 'small-net more-epochs standarized SGD no-dropout bigger-batches relu shuffle',
+          'tags' : ['small-net', 'more-epochs', 'standarized','SGD','no-dropout','bigger-batches','relu', 'shuffle'],
           'source_files' : ['analyze_Pawel.py', 'networks.py']
          }
 
@@ -75,8 +75,8 @@ def make_loader(dataset):
     test_data = torch.tensor(test.values, dtype=torch.float)
     train_tensor = TensorDataset(train_data, train_target)
     test_tensor = TensorDataset(test_data, test_target)
-    train_loader = DataLoader(dataset = train_tensor)
-    test_loader = DataLoader(dataset = test_tensor)
+    train_loader = DataLoader(dataset = train_tensor, shuffle=True)
+    test_loader = DataLoader(dataset = test_tensor, shuffle=True)
     return train_loader, test_loader
 
 
@@ -112,8 +112,8 @@ if __name__ == "__main__":
 	        os.makedirs(os.path.join('models', PARAMS['experiment_name'], d))
 
 	run_experiment(dfh, 'dfh', PARAMS)
-	#run_experiment(dfh_r, 'dfhr', PARAMS)
-	#run_experiment(dfh_phi, 'dfhphi', PARAMS)
-	#run_experiment(dfp, 'dfp', PARAMS)
-	#run_experiment(dfp_r, 'dfpr', PARAMS)
-	#run_experiment(dfp_phi, 'dfpphi', PARAMS)
+	run_experiment(dfh_r, 'dfhr', PARAMS)
+	run_experiment(dfh_phi, 'dfhphi', PARAMS)
+	run_experiment(dfp, 'dfp', PARAMS)
+	run_experiment(dfp_r, 'dfpr', PARAMS)
+	run_experiment(dfp_phi, 'dfpphi', PARAMS)
