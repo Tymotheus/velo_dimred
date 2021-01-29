@@ -42,6 +42,14 @@ dfp = mds.dfp.df.iloc[:,9:]
 dfp_r = mds.dfp['R'].df.iloc[:,9:]
 dfp_phi = mds.dfp['phi'].df.iloc[:,9:]
 
+#scaling input data
+dfh = dfh.sub(dfh.mean(1), axis=0).div(dfh.std(1), axis=0)
+dfh_r = dfh_r.sub(dfh_r.mean(1), axis=0).div(dfh_r.std(1), axis=0)
+dfh_phi = dfh_phi.sub(dfh_phi.mean(1), axis=0).div(dfh_phi.std(1), axis=0)
+dfp = dfp.sub(dfp.mean(1), axis=0).div(dfp.std(1), axis=0)
+dfp_r = dfp_r.sub(dfp_r.mean(1), axis=0).div(dfp_r.std(1), axis=0)
+dfp_phi = dfp_phi.sub(dfp_phi.mean(1), axis=0).div(dfp_phi.std(1), axis=0)
+
 dfh_metadata = mds.dfh.df.iloc[:,:9]
 dfh_r_metadata = mds.dfh['R'].df.iloc[:,:9]
 dfh_phi_metadata = mds.dfh['phi'].df.iloc[:,:9]
@@ -105,7 +113,9 @@ def plot(dataset, datasetName, metadata, exp_name, exp_id):
     my_exp.append_tag('plot-added')
     my_exp.log_image('reducedData', fig, image_name='reducedData')
 
-plot(dfh, 'dfh', dfh_metadata, PARAMS['experiment_name'], PARAMS['experiment_id'])
+#plot(dfh, 'dfh', dfh_metadata, PARAMS['experiment_name'], PARAMS['experiment_id'])
+plot(dfh_r, 'dfh_r', dfh_r_metadata, PARAMS['experiment_name'], PARAMS['experiment_id'])
+
 
 #run_experiment(dfh, 'dfh', dfh_sensor_numbers, PARAMS)
 #run_experiment(dfh_r, 'dfhr', PARAMS)
