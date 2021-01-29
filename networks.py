@@ -34,11 +34,14 @@ def get_dataset(path):
 class VeloEncoder(nn.Module):
     def __init__(self, input_size):
         nn.Module.__init__(self)
-        self.e1 = nn.Linear(input_size, 40)
+        self.e1 = nn.Linear(input_size, 600)
+        self.e2 = nn.Linear(600, 200)
         #self.drop1 = nn.Dropout(0.1)
-        self.e2 = nn.Linear(40, 10)
+        self.e3 = nn.Linear(200, 40)
         #self.drop2 = nn.Dropout(0.1)
-        self.e3 = nn.Linear(10, 2)
+        self.e4 = nn.Linear(40, 10)
+        self.e5 = nn.Linear(10, 2)
+
         #self.drop3 = nn.Dropout(0.1)
 
     def forward(self, x):
@@ -49,6 +52,10 @@ class VeloEncoder(nn.Module):
         #x = self.drop2(x)
         x = F.relu(x)
         x = self.e3(x)
+        x = F.relu(x)
+        x = self.e4(x)
+        x = F.relu(x)
+        x = self.e5(x)
         #x = self.drop3(x)
         return x
 
@@ -56,14 +63,20 @@ class VeloEncoder(nn.Module):
 class VeloDecoder(nn.Module):
     def __init__(self, output_size):
         nn.Module.__init__(self)
-        self.e3 = nn.Linear(2, 10)
+        self.e5 = nn.Linear(2, 10)
+        self.e4 = nn.Linear(10, 40)
         #self.drop3 = nn.Dropout(0.1)
-        self.e2 = nn.Linear(10, 40)
+        self.e3 = nn.Linear(40, 200)
+        self.e2 = nn.Linear(200, 600)
         #self.drop2 = nn.Dropout(0.1)
-        self.e1 = nn.Linear(40, output_size)
+        self.e1 = nn.Linear(600, output_size)
         #self.drop1 = nn.Dropout(0.1)
 
     def forward(self, x):
+        x = self.e5(x)
+        x = F.relu(x)
+        x = self.e4(x)
+        x = F.relu(x)
         x = self.e3(x)
         #x = self.drop3(x)
         x = F.relu(x)

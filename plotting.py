@@ -16,10 +16,10 @@ PARAMS = {'max_epochs': 1,
           'learning_rate': 0.05,
           'batch_size': 64,
           'gpus' : 1,
-          'experiment_name' : 'debuging standarized SGD no-dropout bigger-batches relu shuffle',
+          'experiment_name' : 'large-net normal-epochs standarized SGD no-dropout bigger-batches relu shuffle',
           'tags' : ["testing"],
           'source_files' : ['analyze_Pawel.py', 'networks.py'],
-          'experiment_id' : 'VEL-369'
+          'experiment_id' : 'VEL-389'
          }
 
 datasetNames = ['dfh', 'dfhr', 'dfhphi', 'dfp', 'dfpr', 'dfpphi']
@@ -95,7 +95,7 @@ def plot(dataset, datasetName, metadata, exp_name, exp_id):
     x2DList.append(tempX)
     y2DList.append(tempY)
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(20,10))
     ax1 = fig.add_subplot(111)
     alpha = 0.4
     cmap = get_cmap( len(sensorNumberList) )
@@ -113,8 +113,12 @@ def plot(dataset, datasetName, metadata, exp_name, exp_id):
     my_exp.append_tag('plot-added')
     my_exp.log_image('reducedData', fig, image_name='reducedData')
 
-#plot(dfh, 'dfh', dfh_metadata, PARAMS['experiment_name'], PARAMS['experiment_id'])
-plot(dfh_r, 'dfh_r', dfh_r_metadata, PARAMS['experiment_name'], PARAMS['experiment_id'])
+plot(dfh, 'dfh', dfh_metadata, PARAMS['experiment_name'], 'VEL-389')
+plot(dfh_r, 'dfhr', dfh_r_metadata, PARAMS['experiment_name'], 'VEL-392')
+plot(dfh_phi, 'dfhphi', dfh_phi_metadata, PARAMS['experiment_name'], 'VEL-395')
+plot(dfp, 'dfp', dfp_metadata, PARAMS['experiment_name'], 'VEL-396')
+#plot(dfp_r, 'dfpr', dfp_r_metadata, PARAMS['experiment_name'], PARAMS['experiment_id'])
+#plot(dfp_phi, 'dfpphi', dfp_phi_metadata, PARAMS['experiment_name'], PARAMS['experiment_id'])
 
 
 #run_experiment(dfh, 'dfh', dfh_sensor_numbers, PARAMS)

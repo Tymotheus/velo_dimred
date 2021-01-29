@@ -25,8 +25,8 @@ PARAMS = {'max_epochs': 50,
           'learning_rate': 0.02,
           'batch_size': 64,
           'gpus' : 1,
-          'experiment_name' : 'small-net normal-epochs standarized SGD no-dropout bigger-batches relu shuffle',
-          'tags' : ['small-net', 'normal-epochs', 'standarized','SGD','no-dropout','bigger-batches','relu', 'shuffle'],
+          'experiment_name' : 'large-net normal-epochs standarized SGD no-dropout bigger-batches relu shuffle',
+          'tags' : ['large-net', 'normal-epochs', 'standarized','SGD','no-dropout','bigger-batches','relu', 'shuffle'],
           'source_files' : ['analyze_Pawel.py', 'networks.py']
          }
 
